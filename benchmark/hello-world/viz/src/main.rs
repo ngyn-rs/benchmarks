@@ -1,7 +1,7 @@
 #![deny(warnings)]
 
 use std::net::SocketAddr;
-use viz::{get, Request, Result, Router, Server, ServiceMaker, Error};
+use viz::{get, Error, Request, Result, Router, Server, ServiceMaker};
 
 async fn index(_: Request) -> Result<&'static str> {
     Ok("Hello, World!")

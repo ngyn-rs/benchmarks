@@ -2,10 +2,8 @@ use axum::{routing::get, Router};
 
 #[tokio::main]
 async fn main() {
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     let app = Router::new().route("/", get(|| async { "Hello, World!" }));
 
-    axum::Server::bind(&"127.0.0.1:3000".parse().unwrap())
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
+    let _ = axum::serve(listener, app);
 }
