@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ngyn = "0.4"
+ngyn = { version = "0.4", path = "../../../../ngyn/crates/core" }
 ngyn-hyper = "0.1"
 tokio = { version = "1", features = ["full"] }
