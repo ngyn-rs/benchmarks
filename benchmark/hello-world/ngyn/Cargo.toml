@@ -4,6 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ngyn = "0.4"
-ngyn-hyper = "0.1"
+ngyn = "0.5"
 tokio = { version = "1", features = ["full"] }

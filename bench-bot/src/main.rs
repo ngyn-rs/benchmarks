@@ -1,4 +1,5 @@
 use self::markdown::Markdown;
+use self::report::{Metrics, Report};
 use clap::Parser;
 use log::LevelFilter;
 use serde::{Deserialize, Serialize};
@@ -14,7 +15,6 @@ use std::{
     time::Duration,
 };
 use sysinfo::{CpuExt, PidExt, ProcessExt, System, SystemExt};
-use self::report::{Metrics, Report};
 
 mod markdown;
 mod report;
@@ -179,38 +179,35 @@ fn main() {
                 max_memory
             });
 
-            let output = Command::new("rewrk").args(rewrk_args).output().unwrap();
+            if let Ok(output) = Command::new("rewrk").args(rewrk_args).output() {
+                tx.send(()).unwrap();
+                let _ = server.kill();
+                let max_memory = mem_usage_thread.join().unwrap();
+                let max_memory =
+                    f64::from(u32::try_from(max_memory).expect("mem usage too high")) / 1024.0;
 
-            tx.send(()).unwrap();
-            let _ = server.kill();
-            let max_memory = mem_usage_thread.join().unwrap();
-            let max_memory =
-                f64::from(u32::try_from(max_memory).expect("mem usage too high")) / 1024.0;
-
-            if output.stderr.len() > 0 {
-                log::error!(
-                    "Benchmarking {:?} failed: \n{}",
-                    member,
-                    String::from_utf8_lossy(&output.stderr)
-                );
-            } else {
-                let stdout = String::from_utf8_lossy(&output.stdout);
-
-                result_md.add_item(format!("## {}", framework_name));
-                result_md.add_item(format!("Maximum Memory Usage: {:.1} MB", max_memory));
-                result_md.add_item(format!("```\n{}\n```", stdout.trim()));
-
-                if let Ok(metrics) = stdout.parse::<Metrics>() {
-                    reports.push(Report::new(
-                        framework_name,
-                        max_memory,
-                        metrics,
-                    ));
+                if output.stderr.len() > 0 {
+                    log::error!(
+                        "Benchmarking {:?} failed: \n{}",
+                        member,
+                        String::from_utf8_lossy(&output.stderr)
+                    );
                 } else {
-                    log::warn!("Could not parse benchmark result: {}", stdout);
-                }
-            }
+                    let stdout = String::from_utf8_lossy(&output.stdout);
 
+                    result_md.add_item(format!("## {}", framework_name));
+                    result_md.add_item(format!("Maximum Memory Usage: {:.1} MB", max_memory));
+                    result_md.add_item(format!("```\n{}\n```", stdout.trim()));
+
+                    if let Ok(metrics) = stdout.parse::<Metrics>() {
+                        reports.push(Report::new(framework_name, max_memory, metrics));
+                    } else {
+                        log::warn!("Could not parse benchmark result: {}", stdout);
+                    }
+                }
+            } else {
+                log::error!("Benchmarking {:?} failed, rewrk not installed", member);
+            }
             // lets CPU cooling down, ignore last member.
             if index != members_len - 1 {
                 thread::sleep(Duration::from_secs(cd));
