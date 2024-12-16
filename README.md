@@ -20,6 +20,7 @@ Respond "Hello, World!" to every request on "/" endpoint.
 - [astra](benchmark/hello-world/astra/src/main.rs)
 - [axum](benchmark/hello-world/axum/src/main.rs)
 - [hyper](benchmark/hello-world/hyper/src/main.rs)
+- [ngyn](benchmark/hello-world/ngyn/src/main.rs)
 - [ntex](benchmark/hello-world/ntex/src/main.rs)
 - [poem](benchmark/hello-world/poem/src/main.rs)
 - [rocket](benchmark/hello-world/rocket/src/main.rs)
@@ -30,6 +31,21 @@ Respond "Hello, World!" to every request on "/" endpoint.
 - [warp](benchmark/hello-world/warp/src/main.rs)
 
 See [results](result/hello-world.md).
+
+## Get Started
+
+- Install rewrk
+
+```
+cargo install rewrk --git https://github.com/ChillFish8/rewrk.git
+```
+
+- Run bench-bot
+
+```
+cargo run --manifest-path bench-bot/Cargo.toml -- -w benchmark -o result
+```
+
 
 [rewrk]: https://github.com/ChillFish8/rewrk
 [rust]: https://github.com/rust-lang/rust
